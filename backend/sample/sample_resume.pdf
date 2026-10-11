@@ -1,0 +1,70 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 3080 >>
+stream
+BT /F2 20 Tf 56 742 Td (ALEX MORGAN) Tj ET
+BT /F1 10 Tf 56 714 Td (Senior Software Engineer  |  alex.morgan@email.com  |  +1 555 123 4567  |  San Francisco, CA) Tj ET
+BT /F1 10 Tf 56 700 Td (linkedin.com/in/alexmorgan  |  github.com/alexmorgan) Tj ET
+BT /F2 13 Tf 56 672 Td (SUMMARY) Tj ET
+BT /F1 11 Tf 56 651 Td (Results-driven software engineer with 6+ years building scalable web applications) Tj ET
+BT /F1 11 Tf 56 637 Td (in Python, TypeScript, and React. Led teams of up to 5 engineers, cut API latency) Tj ET
+BT /F1 11 Tf 56 623 Td (by 40%, and shipped products used by 500k+ monthly users.) Tj ET
+BT /F2 13 Tf 56 595 Td (SKILLS) Tj ET
+BT /F1 11 Tf 56 574 Td (Languages: Python, TypeScript, JavaScript, SQL, Go) Tj ET
+BT /F1 11 Tf 56 560 Td (Frameworks: React, Next.js, FastAPI, Django, Node.js, Tailwind CSS) Tj ET
+BT /F1 11 Tf 56 546 Td (Tools: Docker, Kubernetes, AWS, PostgreSQL, Redis, Git, CI/CD, Grafana) Tj ET
+BT /F1 11 Tf 56 532 Td (Practices: REST API design, TDD, Agile/Scrum, system design, code review) Tj ET
+BT /F2 13 Tf 56 504 Td (EXPERIENCE) Tj ET
+BT /F2 11 Tf 56 483 Td (Senior Software Engineer - Acme Corp  |  2021 - Present) Tj ET
+BT /F1 11 Tf 56 469 Td (- Led redesign of the payments API serving 2M requests/day, reducing p95 latency) Tj ET
+BT /F1 11 Tf 56 455 Td (  from 800ms to 480ms \(-40%\) through query optimization and Redis caching.) Tj ET
+BT /F1 11 Tf 56 441 Td (- Mentored 4 junior engineers; introduced code-review checklist that cut bugs) Tj ET
+BT /F1 11 Tf 56 427 Td (  reported in production by 30% over two quarters.) Tj ET
+BT /F1 11 Tf 56 413 Td (- Built a Next.js analytics dashboard adopted by 12 internal teams.) Tj ET
+BT /F2 11 Tf 56 385 Td (Software Engineer - Beta Startup  |  2018 - 2021) Tj ET
+BT /F1 11 Tf 56 371 Td (- Developed FastAPI microservices with PostgreSQL and Docker, deployed on AWS ECS.) Tj ET
+BT /F1 11 Tf 56 357 Td (- Implemented CI/CD pipelines \(GitHub Actions\) that shortened release cycles) Tj ET
+BT /F1 11 Tf 56 343 Td (  from weekly to daily deploys.) Tj ET
+BT /F1 11 Tf 56 329 Td (- Collaborated with product and design to ship 3 customer-facing features) Tj ET
+BT /F1 11 Tf 56 315 Td (  that increased activation by 18%.) Tj ET
+BT /F2 11 Tf 56 287 Td (Software Intern - Gamma Inc.  |  2017) Tj ET
+BT /F1 11 Tf 56 273 Td (- Automated a manual reporting workflow with Python, saving ~10 hours/week.) Tj ET
+BT /F2 13 Tf 56 245 Td (EDUCATION) Tj ET
+BT /F1 11 Tf 56 224 Td (B.S. Computer Science - State University  |  2014 - 2018  |  GPA: 3.7/4.0) Tj ET
+BT /F1 11 Tf 56 210 Td (Relevant coursework: Data Structures, Operating Systems, Databases, ML Basics) Tj ET
+BT /F2 13 Tf 56 182 Td (PROJECTS) Tj ET
+BT /F1 11 Tf 56 161 Td (- OpenBoard \(github.com/alexmorgan/openboard\): Real-time collaborative whiteboard) Tj ET
+BT /F1 11 Tf 56 147 Td (  built with WebSockets and React; 1.2k GitHub stars.) Tj ET
+BT /F1 11 Tf 56 133 Td (- cli-tools \(github.com/alexmorgan/cli-tools\): Python CLI utilities package with) Tj ET
+BT /F1 11 Tf 56 119 Td (  95% test coverage, published on PyPI \(5k+ downloads\).) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000003383 00000 n 
+0000003480 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+3582
+%%EOF

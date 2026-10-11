@@ -1,0 +1,21 @@
+# Python
+backend/venv/
+backend/.pip-cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+.npm-cache/
+
+# Env / secrets
+.env
+.env.local
+.env*.local
+
+# Misc
+*.log
+.DS_Store
