@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +27,7 @@ from .services.analyzer import (
 )
 from .services.docx_builder import build_docx
 from .services.pdf import ResumeValidationError, extract_text
+from .vercel import VercelPathMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("resume-analyzer")
@@ -39,6 +41,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Vercel sets VERCEL=1; there, requests can arrive rewritten to the function path.
+if os.getenv("VERCEL"):
+    app.add_middleware(VercelPathMiddleware)
 
 
 async def _read_resume(file: UploadFile) -> str:
@@ -168,8 +174,7 @@ async def http_exception_handler(request, exc: StarletteHTTPException):
     if exc.status_code == 404:
         # Helps debug hosting/routing problems: shows the path the app actually saw.
         content["path"] = request.url.path
-        if "vercel_original" in request.scope:
-            content["received"] = request.scope["vercel_original"]
+        content["query"] = request.url.query
     return JSONResponse(status_code=exc.status_code, content=content, headers=exc.headers)
 
 
