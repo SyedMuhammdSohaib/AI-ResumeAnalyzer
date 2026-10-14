@@ -1,6 +1,8 @@
 import asyncio
 import re
 
+import groq
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
@@ -180,13 +182,47 @@ def _jd_section(job_description: str | None, heading: str) -> str:
     return "No job description provided.\n\n"
 
 
+class AIServiceError(RuntimeError):
+    """An AI failure with a message that is safe and useful to show to the user."""
+
+    def __init__(self, message: str, status_code: int = 502):
+        super().__init__(message)
+        self.message = message
+        self.status_code = status_code
+
+
+def _groq_error_message(exc: Exception) -> AIServiceError | None:
+    if isinstance(exc, groq.AuthenticationError):
+        return AIServiceError(
+            "Groq rejected the API key. Check GROQ_API_KEY (no spaces or quotes).", 503
+        )
+    if isinstance(exc, groq.NotFoundError):
+        return AIServiceError(
+            f"Groq model '{GROQ_MODEL}' was not found. Check GROQ_MODEL.", 503
+        )
+    if isinstance(exc, groq.PermissionDeniedError):
+        return AIServiceError(
+            f"Your Groq account cannot use model '{GROQ_MODEL}'. Try another GROQ_MODEL.", 503
+        )
+    if isinstance(exc, groq.RateLimitError):
+        return AIServiceError("Groq rate limit reached. Wait a minute and try again.", 429)
+    if isinstance(exc, (groq.APIConnectionError, groq.APITimeoutError)):
+        return AIServiceError("Could not connect to Groq. Please try again.", 502)
+    if isinstance(exc, groq.BadRequestError):
+        return AIServiceError(f"Groq rejected the request: {str(exc)[:300]}", 502)
+    return None
+
+
 async def _run(chain, inputs: dict):
     try:
         return await asyncio.wait_for(chain.ainvoke(inputs), timeout=AI_TIMEOUT_SECONDS)
     except asyncio.TimeoutError as exc:
-        raise RuntimeError("AI request timed out. Please try again.") from exc
+        raise AIServiceError("AI request timed out. Please try again.", 504) from exc
     except Exception as exc:
-        raise RuntimeError(f"AI request failed: {exc}") from exc
+        friendly = _groq_error_message(exc)
+        if friendly:
+            raise friendly from exc
+        raise RuntimeError(f"AI request failed: {type(exc).__name__}: {exc}") from exc
 
 
 async def analyze_resume(
