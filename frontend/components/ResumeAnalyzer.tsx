@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { fileSizeError, postApi } from "@/lib/api";
 import type { Language, ResumeAnalysis } from "@/lib/types";
+import AutoImprove from "./AutoImprove";
 import BulletRewriter from "./BulletRewriter";
 import CoverLetter from "./CoverLetter";
 import ScoreRing from "./ScoreRing";
@@ -146,6 +147,7 @@ export default function ResumeAnalyzer() {
       {result && <Results data={result} />}
 
       <h2 className="tools-title">AI tools</h2>
+      <AutoImprove file={file} jobDescription={jobDescription} />
       <div className="grid-2 tools">
         <BulletRewriter jobDescription={jobDescription} />
         <CoverLetter file={file} jobDescription={jobDescription} />

@@ -6,7 +6,14 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
 
 from ..config import GROQ_API_KEY, GROQ_MODEL
-from ..schemas import CoverLetter, Language, ResumeAnalysis, RewriteResult
+from ..schemas import (
+    CoverLetter,
+    ImprovedLine,
+    ImproveResult,
+    Language,
+    ResumeAnalysis,
+    RewriteResult,
+)
 
 AI_TIMEOUT_SECONDS = 90
 
@@ -79,6 +86,31 @@ REWRITE_USER_PROMPT = """Original line:
 \"\"\"
 
 {jd_section}Rewrite it."""
+
+IMPROVE_SYSTEM_PROMPT = """You are an expert resume writer.
+Read the resume and find its 4-8 weakest lines: vague bullet points, lines without a strong
+action verb, lines that list duties instead of results, or lines with no measurable impact.
+For each one, write a stronger version for the resume, in English.
+
+Rules for the improved line:
+- Start with a strong action verb (Led, Built, Designed, Improved, Reduced...).
+- One line, no more than 30 words, focused on impact.
+- If there is no number, you may use a placeholder like "[X]%" or "[N] users" for the
+  candidate to fill in. Never invent concrete numbers, employers, or technologies.
+- If a job description is given, use its relevant keywords where truthful.
+
+Output format, repeated for every weak line, and nothing else:
+ORIGINAL: <the weak line copied exactly as written in the resume>
+IMPROVED: <the stronger version>
+WHY: <one short sentence on what was weak>
+"""
+
+IMPROVE_USER_PROMPT = """Resume:
+\"\"\"
+{resume_text}
+\"\"\"
+
+{jd_section}Find and improve the weakest lines."""
 
 COVER_LETTER_SYSTEM_PROMPT = """You are an expert career coach who writes cover letters.
 Write a professional, warm cover letter in English for the candidate below, tailored to
@@ -173,6 +205,56 @@ def _clean_line(line: str) -> str:
     """Strip list markers, markdown bold and wrapping quotes the model may add."""
     line = re.sub(r"^\s*(?:[-•*]|\d+[.)])\s*", "", line).replace("**", "")
     return line.strip().strip('"').strip()
+
+
+_IMPROVE_FIELD = re.compile(r"^\s*\**\s*(ORIGINAL|IMPROVED|WHY)\s*\**\s*:\s*\**\s*(.*)$", re.I)
+
+
+def _parse_improvements(output: str) -> list[ImprovedLine]:
+    """Parse ORIGINAL/IMPROVED/WHY blocks from the model's plain text output."""
+    lines: list[ImprovedLine] = []
+    current: dict[str, str] = {}
+
+    def flush() -> None:
+        if current.get("original") and current.get("improved"):
+            lines.append(
+                ImprovedLine(
+                    original=_clean_line(current["original"]),
+                    improved=_clean_line(current["improved"]),
+                    reason=_clean_line(current.get("why", "")),
+                )
+            )
+        current.clear()
+
+    for raw in output.splitlines():
+        match = _IMPROVE_FIELD.match(raw)
+        if not match:
+            continue
+        key, value = match.group(1).lower(), match.group(2)
+        if key == "original" and current:
+            flush()
+        current[key] = value
+    flush()
+    return lines
+
+
+async def improve_resume(resume_text: str, job_description: str | None) -> ImproveResult:
+    prompt = ChatPromptTemplate.from_messages(
+        [("system", IMPROVE_SYSTEM_PROMPT), ("human", IMPROVE_USER_PROMPT)]
+    )
+    # Plain text output, like the rewriter: more reliable than tool calling.
+    chain = prompt | _llm(temperature=0.3) | StrOutputParser()
+    output: str = await _run(
+        chain,
+        {
+            "resume_text": resume_text,
+            "jd_section": _jd_section(job_description, "Target job description"),
+        },
+    )
+    lines = _parse_improvements(output)
+    if not lines:
+        raise RuntimeError("AI returned no improvements.")
+    return ImproveResult(lines=lines)
 
 
 async def write_cover_letter(resume_text: str, job_description: str) -> CoverLetter:

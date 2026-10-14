@@ -5,8 +5,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import ALLOWED_ORIGINS, MAX_FILE_SIZE
-from .schemas import CoverLetter, Language, ResumeAnalysis, RewriteRequest, RewriteResult
-from .services.analyzer import analyze_resume, rewrite_bullet, write_cover_letter
+from .schemas import (
+    CoverLetter,
+    ImproveResult,
+    Language,
+    ResumeAnalysis,
+    RewriteRequest,
+    RewriteResult,
+)
+from .services.analyzer import (
+    analyze_resume,
+    improve_resume,
+    rewrite_bullet,
+    write_cover_letter,
+)
 from .services.pdf import ResumeValidationError, extract_text
 
 logging.basicConfig(level=logging.INFO)
@@ -77,6 +89,19 @@ async def analyze(
 async def rewrite(request: RewriteRequest) -> RewriteResult:
     try:
         return await rewrite_bullet(request.text, request.job_description)
+    except RuntimeError as exc:
+        raise _ai_error(exc)
+
+
+@app.post("/improve", response_model=ImproveResult)
+async def improve(
+    file: UploadFile = File(..., description="Resume PDF"),
+    job_description: str | None = Form(default=None, max_length=20000),
+) -> ImproveResult:
+    resume_text = await _read_resume(file)
+    logger.info("Improving weak lines for: %s", file.filename)
+    try:
+        return await improve_resume(resume_text, job_description)
     except RuntimeError as exc:
         raise _ai_error(exc)
 

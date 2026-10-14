@@ -436,6 +436,69 @@ body {
   gap: 10px;
 }
 
+.improvements {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.improvements li {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.improvements p {
+  margin: 0;
+}
+
+.before {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(242, 109, 109, 0.6);
+}
+
+.after {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.tag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: 1px;
+}
+
+.before .tag {
+  background: rgba(242, 109, 109, 0.15);
+  color: var(--red);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.after .tag {
+  background: rgba(53, 208, 127, 0.15);
+  color: var(--green);
+}
+
+.why {
+  font-size: 0.85rem;
+}
+
 @media (max-width: 720px) {
   .grid-2 {
     grid-template-columns: 1fr;

@@ -41,3 +41,13 @@ class RewriteResult(BaseModel):
 
 class CoverLetter(BaseModel):
     cover_letter: str
+
+
+class ImprovedLine(BaseModel):
+    original: str
+    improved: str
+    reason: str
+
+
+class ImproveResult(BaseModel):
+    lines: list[ImprovedLine]

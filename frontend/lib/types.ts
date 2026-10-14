@@ -31,3 +31,13 @@ export interface RewriteResult {
 export interface CoverLetterResult {
   cover_letter: string;
 }
+
+export interface ImprovedLine {
+  original: string;
+  improved: string;
+  reason: string;
+}
+
+export interface ImproveResult {
+  lines: ImprovedLine[];
+}
