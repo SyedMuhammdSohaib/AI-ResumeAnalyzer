@@ -69,6 +69,11 @@ def _ai_error(exc: RuntimeError) -> HTTPException:
     )
 
 
+@app.get("/")
+async def root() -> dict:
+    return {"message": "AI Resume Analyzer API is running.", "docs": "/docs"}
+
+
 @app.get("/health")
 async def health() -> dict:
     return {"status": "ok"}
