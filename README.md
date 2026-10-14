@@ -7,8 +7,11 @@ Built as a beginner-friendly MVP using **LangChain**, **FastAPI**, **Groq** and 
 ## Features
 
 - Upload your resume (PDF) and get an instant AI analysis
-- Highlights strengths and weak areas in your resume
-- Suggests improvements and missing skills
+- ATS score, section-wise scores, strengths, weaknesses and suggestions
+- Job match percentage and missing keywords (when you paste a job description)
+- Feedback in **English, Roman Urdu, Urdu or Hindi**
+- **Bullet rewriter**: paste a weak resume line and get 3 stronger versions
+- **Cover letter generator**: a tailored cover letter from your resume + job description
 - Clean, modern web interface
 - Fast responses powered by Groq's free cloud LLM API
 
@@ -57,12 +60,15 @@ Create a `.env` file inside the `backend` folder:
 
 ```
 GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
+
+(You can copy `backend/.env.example`. If the model gives a 404 for your key, try `openai/gpt-oss-120b`.)
 
 Start the server:
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 The API runs at `http://localhost:8000`.
@@ -79,12 +85,33 @@ npm run dev
 
 The app runs at `http://localhost:3000`.
 
+**Windows shortcut:** double-click `start-resume-analyzer.bat` in the project root. It starts both servers and opens the browser.
+
+### 4. Quick API check (optional)
+
+With the backend running:
+
+```bash
+cd backend
+pip install httpx
+python test_analyze.py
+```
+
 ## How It Works
 
 1. The user uploads a resume from the Next.js frontend.
 2. The FastAPI backend extracts the text from the file.
 3. LangChain sends the text to a Groq-hosted LLM with a carefully written prompt.
 4. The analysis is returned to the frontend and displayed to the user.
+
+### API endpoints
+
+| Method | Path            | What it does                                                      |
+|--------|-----------------|-------------------------------------------------------------------|
+| GET    | `/health`       | Health check                                                      |
+| POST   | `/analyze`      | Form: `file` (PDF), optional `job_description`, `language`        |
+| POST   | `/rewrite`      | JSON: `{ "text": "...", "job_description": "..." }` → 3 rewrites  |
+| POST   | `/cover-letter` | Form: `file` (PDF), `job_description` → cover letter text         |
 
 ## Screenshots
 
@@ -94,8 +121,8 @@ _Add screenshots of the app here._
 
 ## Future Improvements
 
-- Match a resume against a specific job description
-- Resume score and section-by-section ratings
+- Interview question generator
+- Download the analysis as a PDF report
 - Support for more file formats (DOCX)
 - User accounts and saved analysis history
 

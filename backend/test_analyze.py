@@ -1,11 +1,12 @@
 """Smoke test: POST sample_resume.pdf to /analyze and print the result."""
 import json
 import sys
+from pathlib import Path
 
 import httpx
 
 BASE_URL = "http://127.0.0.1:8000"
-PDF_PATH = "E:/resume-analyzer/backend/sample/sample_resume.pdf"
+PDF_PATH = Path(__file__).resolve().parent / "sample" / "sample_resume.pdf"
 JOB_DESCRIPTION = "Python backend developer with FastAPI and Docker experience."
 
 

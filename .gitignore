@@ -19,3 +19,4 @@ frontend/out/
 # Misc
 *.log
 .DS_Store
+*.tsbuildinfo
