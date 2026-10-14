@@ -2,9 +2,19 @@
 
 import { useRef, useState } from "react";
 
-import { API_BASE, fileSizeError } from "@/lib/api";
-import type { ResumeAnalysis } from "@/lib/types";
+import { fileSizeError, postApi } from "@/lib/api";
+import type { Language, ResumeAnalysis } from "@/lib/types";
+import AutoImprove from "./AutoImprove";
+import BulletRewriter from "./BulletRewriter";
+import CoverLetter from "./CoverLetter";
 import ScoreRing from "./ScoreRing";
+
+const LANGUAGES: { value: Language; label: string }[] = [
+  { value: "English", label: "English" },
+  { value: "Roman Urdu", label: "Roman Urdu" },
+  { value: "Urdu", label: "اردو (Urdu)" },
+  { value: "Hindi", label: "हिंदी (Hindi)" },
+];
 
 const SECTION_LABELS: Record<keyof ResumeAnalysis["section_scores"], string> = {
   skills: "Skills",
@@ -13,20 +23,10 @@ const SECTION_LABELS: Record<keyof ResumeAnalysis["section_scores"], string> = {
   formatting: "Formatting",
 };
 
-async function readError(response: Response): Promise<string> {
-  let detail = `Request failed (${response.status}).`;
-  try {
-    const body = await response.json();
-    if (typeof body?.detail === "string") detail = body.detail;
-  } catch {
-    /* non-JSON error body */
-  }
-  return detail;
-}
-
 export default function ResumeAnalyzer() {
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [language, setLanguage] = useState<Language>("English");
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,18 +50,10 @@ export default function ResumeAnalyzer() {
       const form = new FormData();
       form.append("file", file);
       if (jobDescription.trim()) form.append("job_description", jobDescription.trim());
-
-      const response = await fetch(`${API_BASE}/analyze`, {
-        method: "POST",
-        body: form,
-      });
-      if (!response.ok) {
-        setError(await readError(response));
-        return;
-      }
-      setResult((await response.json()) as ResumeAnalysis);
-    } catch {
-      setError("Could not reach the API. Is the backend running on port 8000?");
+      form.append("language", language);
+      setResult(await postApi<ResumeAnalysis>("/analyze", form));
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -119,6 +111,22 @@ export default function ResumeAnalyzer() {
           onChange={(e) => setJobDescription(e.target.value)}
         />
 
+        <label className="field-label" htmlFor="language">
+          Feedback language
+        </label>
+        <select
+          id="language"
+          className="select"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as Language)}
+        >
+          {LANGUAGES.map((lang) => (
+            <option key={lang.value} value={lang.value}>
+              {lang.label}
+            </option>
+          ))}
+        </select>
+
         <button className="primary" onClick={submit} disabled={!file || loading}>
           {loading ? "Analyzing…" : "Analyze resume"}
         </button>
@@ -137,6 +145,13 @@ export default function ResumeAnalyzer() {
       </section>
 
       {result && <Results data={result} />}
+
+      <h2 className="tools-title">AI tools</h2>
+      <AutoImprove file={file} jobDescription={jobDescription} />
+      <div className="grid-2 tools">
+        <BulletRewriter jobDescription={jobDescription} />
+        <CoverLetter file={file} jobDescription={jobDescription} />
+      </div>
     </div>
   );
 }
@@ -148,8 +163,8 @@ function Results({ data }: { data: ResumeAnalysis }) {
         <ScoreRing score={data.ats_score} />
         <div>
           <h2>ATS score</h2>
-          <p className="summary">{data.summary}</p>
-          <p className="muted reason">{data.ats_reason}</p>
+          <p className="summary" dir="auto">{data.summary}</p>
+          <p className="muted reason" dir="auto">{data.ats_reason}</p>
         </div>
       </section>
 
@@ -179,7 +194,7 @@ function Results({ data }: { data: ResumeAnalysis }) {
           <h2>Strengths</h2>
           <ul>
             {data.strengths.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item} dir="auto">{item}</li>
             ))}
           </ul>
         </section>
@@ -187,7 +202,7 @@ function Results({ data }: { data: ResumeAnalysis }) {
           <h2>Weaknesses</h2>
           <ul>
             {data.weaknesses.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item} dir="auto">{item}</li>
             ))}
           </ul>
         </section>
@@ -197,7 +212,7 @@ function Results({ data }: { data: ResumeAnalysis }) {
         <h2>Suggestions</h2>
         <ol>
           {data.suggestions.map((item) => (
-            <li key={item}>{item}</li>
+            <li key={item} dir="auto">{item}</li>
           ))}
         </ol>
       </section>

@@ -7,8 +7,13 @@ Built as a beginner-friendly MVP using **LangChain**, **FastAPI**, **Groq** and 
 ## Features
 
 - Upload your resume (PDF) and get an instant AI analysis
-- Highlights strengths and weak areas in your resume
-- Suggests improvements and missing skills
+- ATS score, section-wise scores, strengths, weaknesses and suggestions
+- Job match percentage and missing keywords (when you paste a job description)
+- Feedback in **English, Roman Urdu, Urdu or Hindi**
+- **Auto-improve**: AI finds the weakest lines in your resume and shows a before/after rewrite for each
+- **Download improved CV**: AI rewrites your whole resume and gives you an editable Word (.docx) file
+- **Bullet rewriter**: paste a weak resume line and get 3 stronger versions
+- **Cover letter generator**: a tailored cover letter from your resume + job description
 - Clean, modern web interface
 - Fast responses powered by Groq's free cloud LLM API
 
@@ -49,20 +54,23 @@ cd AI-ResumeAnalyzer
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate        # On Mac/Linux: source venv/bin/activate
+# Windows
+venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
+
 pip install -r requirements.txt
+cp .env.example .env
 ```
 
-Create a `.env` file inside the `backend` folder:
+Edit `backend/.env` to fill in your keys.
 
-```
-GROQ_API_KEY=your_groq_api_key_here
-```
+If the model gives a 404 for your key, set `GROQ_MODEL` to `openai/gpt-oss-120b` or `llama-3.3-70b-versatile`.
 
 Start the server:
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 The API runs at `http://localhost:8000`.
@@ -74,10 +82,23 @@ Open a new terminal:
 ```bash
 cd frontend
 npm install
+cp .env.example .env.local  # or set NEXT_PUBLIC_API_URL in your shell
 npm run dev
 ```
 
 The app runs at `http://localhost:3000`.
+
+**Windows shortcut:** double-click `start-resume-analyzer.bat` in the project root. It starts both servers and opens the browser.
+
+### 4. Quick API check (optional)
+
+With the backend running:
+
+```bash
+cd backend
+pip install httpx
+python test_analyze.py
+```
 
 ## How It Works
 
@@ -86,17 +107,59 @@ The app runs at `http://localhost:3000`.
 3. LangChain sends the text to a Groq-hosted LLM with a carefully written prompt.
 4. The analysis is returned to the frontend and displayed to the user.
 
-## Screenshots
+### API endpoints
 
-_Add screenshots of the app here._
+| Method | Path            | What it does                                                      |
+|--------|-----------------|-------------------------------------------------------------------|
+| GET    | `/health`       | Health check                                                      |
+| POST   | `/analyze`      | Form: `file` (PDF), optional `job_description`, `language`        |
+| POST   | `/rewrite`      | JSON: `{ "text": "...", "job_description": "..." }` → 3 rewrites  |
+| POST   | `/improve`      | Form: `file` (PDF), optional `job_description` → weak lines + fixes |
+| POST   | `/improved-cv`  | Form: `file` (PDF), optional `job_description`, `rewrites` → .docx file |
+| POST   | `/cover-letter` | Form: `file` (PDF), `job_description` → cover letter text         |
 
-<!-- Example: ![Home page](screenshots/home.png) -->
+## Deployment
+
+### Backend (Render)
+
+1. Create a new [Render](https://render.com) Web Service and connect this repository.
+2. Use the following settings:
+   - **Runtime:** Python 3.12 (or compatible)
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT` (Render sets `$PORT`; the included `backend/Dockerfile` also works if you prefer a Docker deploy)
+3. Add the following environment variables under **Environment**:
+   
+   | Variable | Description | Example |
+   | --- | --- | --- |
+   | `GROQ_API_KEY` | Your Groq API key | `gsk_...` |
+   | `GROQ_MODEL` | LLM model to use | `openai/gpt-oss-120b` (or `llama-3.3-70b-versatile`) |
+   | `ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins (CORS) | `https://your-app.vercel.app,http://localhost:3000` |
+
+4. Deploy the service. Your backend URL will be something like `https://your-backend.onrender.com`.
+
+### Frontend (Vercel)
+
+1. Import this repository into [Vercel](https://vercel.com).
+2. Set the project root to `frontend` in Vercel project settings.
+3. Add the following environment variable:
+   
+   | Variable | Description | Example |
+   | --- | --- | --- |
+   | `NEXT_PUBLIC_API_URL` | Base URL of your deployed backend (no trailing slash) | `https://your-backend.onrender.com` |
+
+4. Deploy. The frontend will call `${NEXT_PUBLIC_API_URL}/analyze`.
+5. Update `ALLOWED_ORIGINS` on your Render backend to include your new Vercel URL.
+
+**Notes:**
+- Keep secrets out of version control. The repo already ignores `.env` and related files. See `backend/.env.example` and `frontend/.env.example`.
+- CORS is read from `ALLOWED_ORIGINS` (comma-separated). By default it allows `http://localhost:3000` for local development.
+- The frontend reads the backend URL from `process.env.NEXT_PUBLIC_API_URL` (falls back to `http://127.0.0.1:8000` for local development).
 
 ## Future Improvements
 
-- Match a resume against a specific job description
-- Resume score and section-by-section ratings
-- Support for more file formats (DOCX)
+- Interview question generator
+- Download the analysis as a PDF report
+- Upload DOCX resumes (not just PDF)
 - User accounts and saved analysis history
 
 ## Author

@@ -1,21 +1,31 @@
 # Python
+venv/
+.venv/
 backend/venv/
 backend/.pip-cache/
 __pycache__/
+**/__pycache__/
 *.py[cod]
 .pytest_cache/
+*.egg-info/
 
 # Node
+node_modules/
 frontend/node_modules/
+.next/
 frontend/.next/
 frontend/out/
 .npm-cache/
 
 # Env / secrets
 .env
+.env.*
+!.env.example
 .env.local
 .env*.local
+**/.env
 
 # Misc
 *.log
 .DS_Store
+*.tsbuildinfo

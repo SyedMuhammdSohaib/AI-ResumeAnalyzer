@@ -21,3 +21,23 @@ export interface ResumeAnalysis {
   suggestions: string[];
   job_match: JobMatch | null;
 }
+
+export type Language = "English" | "Roman Urdu" | "Urdu" | "Hindi";
+
+export interface RewriteResult {
+  options: string[];
+}
+
+export interface CoverLetterResult {
+  cover_letter: string;
+}
+
+export interface ImprovedLine {
+  original: string;
+  improved: string;
+  reason: string;
+}
+
+export interface ImproveResult {
+  lines: ImprovedLine[];
+}

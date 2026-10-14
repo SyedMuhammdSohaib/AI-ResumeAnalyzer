@@ -13,7 +13,7 @@ export default function Home() {
         </p>
       </header>
       <ResumeAnalyzer />
-      <footer className="footer">FastAPI + Groq backend on port 8000</footer>
+      <footer className="footer">Powered by a FastAPI + Groq backend</footer>
     </main>
   );
 }
