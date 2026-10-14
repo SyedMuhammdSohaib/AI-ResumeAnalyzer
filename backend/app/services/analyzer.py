@@ -1,4 +1,5 @@
 import asyncio
+import re
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -69,7 +70,8 @@ Rules:
   "[X]%" or "[N] users" so the candidate can fill in their real figure. Never invent
   concrete numbers, employers, or technologies that are not in the original.
 - If a job description is given, naturally use its relevant keywords where truthful.
-- Return only the rewritten lines, without bullet symbols or numbering."""
+- Output exactly 3 lines, one rewrite per line, and nothing else: no intro, no
+  numbering, no bullet symbols, no explanations."""
 
 REWRITE_USER_PROMPT = """Original line:
 \"\"\"
@@ -151,16 +153,26 @@ async def rewrite_bullet(text: str, job_description: str | None) -> RewriteResul
     prompt = ChatPromptTemplate.from_messages(
         [("system", REWRITE_SYSTEM_PROMPT), ("human", REWRITE_USER_PROMPT)]
     )
-    chain = prompt | _llm(temperature=0.4).with_structured_output(RewriteResult)
-    result: RewriteResult = await _run(
+    # Plain text output: more reliable than tool calling for such a small task.
+    chain = prompt | _llm(temperature=0.4) | StrOutputParser()
+    output: str = await _run(
         chain,
         {
             "text": text.strip(),
             "jd_section": _jd_section(job_description, "Target job description"),
         },
     )
-    result.options = [line.strip(" -•*\t") for line in result.options if line.strip()][:3]
-    return result
+    options = [_clean_line(line) for line in output.splitlines()]
+    options = [line for line in options if line]
+    if not options:
+        raise RuntimeError("AI returned an empty rewrite.")
+    return RewriteResult(options=options[:3])
+
+
+def _clean_line(line: str) -> str:
+    """Strip list markers, markdown bold and wrapping quotes the model may add."""
+    line = re.sub(r"^\s*(?:[-•*]|\d+[.)])\s*", "", line).replace("**", "")
+    return line.strip().strip('"').strip()
 
 
 async def write_cover_letter(resume_text: str, job_description: str) -> CoverLetter:
