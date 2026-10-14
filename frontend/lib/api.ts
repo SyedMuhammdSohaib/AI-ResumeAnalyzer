@@ -1,5 +1,8 @@
+// Base URL of the backend API.
+// Configure it per environment with NEXT_PUBLIC_API_URL
+// (e.g. your Render URL in production). Falls back to local dev.
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
 export const MAX_FILE_SIZE_MB = 5;
 

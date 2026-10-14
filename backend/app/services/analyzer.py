@@ -37,6 +37,8 @@ USER_PROMPT = """Resume:
 def _build_chain():
     if not GROQ_API_KEY:
         raise RuntimeError("GROQ_API_KEY is not set. Add it to backend/.env")
+    if not GROQ_MODEL:
+        raise RuntimeError("GROQ_MODEL is not set. Add it to backend/.env")
 
     llm = ChatGroq(api_key=GROQ_API_KEY, model=GROQ_MODEL, temperature=0)
     prompt = ChatPromptTemplate.from_messages(

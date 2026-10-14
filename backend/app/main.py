@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import CORS_ORIGINS, MAX_FILE_SIZE
+from .config import ALLOWED_ORIGINS, MAX_FILE_SIZE
 from .schemas import ResumeAnalysis
 from .services.analyzer import analyze_resume
 from .services.pdf import ResumeValidationError, extract_text
@@ -15,7 +15,7 @@ app = FastAPI(title="AI Resume Analyzer API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -61,7 +61,7 @@ export default function ResumeAnalyzer() {
       }
       setResult((await response.json()) as ResumeAnalysis);
     } catch {
-      setError("Could not reach the API. Is the backend running on port 8000?");
+      setError(`Could not reach the API at ${API_BASE}. Is the backend running?`);
     } finally {
       setLoading(false);
     }
