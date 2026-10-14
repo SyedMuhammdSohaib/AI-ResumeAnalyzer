@@ -19,6 +19,7 @@ from .schemas import (
     RewriteResult,
 )
 from .services.analyzer import (
+    AIServiceError,
     analyze_resume,
     improve_resume,
     write_improved_resume,
@@ -70,9 +71,11 @@ def _ai_error(exc: RuntimeError) -> HTTPException:
     if "is not set" in message:
         return HTTPException(status_code=503, detail=message)
     logger.error("AI request failed: %s", message)
+    if isinstance(exc, AIServiceError):
+        return HTTPException(status_code=exc.status_code, detail=exc.message)
     return HTTPException(
         status_code=502,
-        detail="The AI service could not complete the request. Please try again.",
+        detail=f"The AI service could not complete the request ({message[:200]}). Please try again.",
     )
 
 
