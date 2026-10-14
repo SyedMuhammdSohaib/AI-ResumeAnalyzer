@@ -1,12 +1,15 @@
+import json
 import logging
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from pydantic import TypeAdapter, ValidationError
 
 from .config import ALLOWED_ORIGINS, MAX_FILE_SIZE
 from .schemas import (
     CoverLetter,
+    ImprovedLine,
     ImproveResult,
     Language,
     ResumeAnalysis,
@@ -16,9 +19,11 @@ from .schemas import (
 from .services.analyzer import (
     analyze_resume,
     improve_resume,
+    write_improved_resume,
     rewrite_bullet,
     write_cover_letter,
 )
+from .services.docx_builder import build_docx
 from .services.pdf import ResumeValidationError, extract_text
 
 logging.basicConfig(level=logging.INFO)
@@ -104,6 +109,38 @@ async def improve(
         return await improve_resume(resume_text, job_description)
     except RuntimeError as exc:
         raise _ai_error(exc)
+
+
+DOCX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+_rewrites_adapter = TypeAdapter(list[ImprovedLine])
+
+
+@app.post("/improved-cv")
+async def improved_cv(
+    file: UploadFile = File(..., description="Resume PDF"),
+    job_description: str | None = Form(default=None, max_length=20000),
+    rewrites: str | None = Form(default=None, max_length=50000),
+) -> Response:
+    """Rewrite the whole resume with AI and return it as a Word (.docx) file."""
+    approved: list[ImprovedLine] = []
+    if rewrites:
+        try:
+            approved = _rewrites_adapter.validate_python(json.loads(rewrites))
+        except (ValueError, ValidationError):
+            raise HTTPException(status_code=422, detail="Invalid rewrites data.")
+
+    resume_text = await _read_resume(file)
+    logger.info("Building improved CV for: %s", file.filename)
+    try:
+        markdown = await write_improved_resume(resume_text, job_description, approved)
+    except RuntimeError as exc:
+        raise _ai_error(exc)
+
+    return Response(
+        content=build_docx(markdown),
+        media_type=DOCX_MEDIA_TYPE,
+        headers={"Content-Disposition": 'attachment; filename="improved-resume.docx"'},
+    )
 
 
 @app.post("/cover-letter", response_model=CoverLetter)

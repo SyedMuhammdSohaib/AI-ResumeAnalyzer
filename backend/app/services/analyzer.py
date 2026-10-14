@@ -112,6 +112,35 @@ IMPROVE_USER_PROMPT = """Resume:
 
 {jd_section}Find and improve the weakest lines."""
 
+IMPROVED_CV_SYSTEM_PROMPT = """You are an expert resume writer.
+Rewrite the candidate's whole resume into a stronger, ATS-friendly version in English.
+
+Content rules:
+- Keep every real fact: name, contact details, employers, job titles, dates, degrees,
+  schools, projects, certifications and skills. Never invent any of them.
+- Rewrite weak bullet points with strong action verbs and a focus on impact. Where a
+  number would help but none is given, use a placeholder like "[X]%" or "[N] users".
+- Add a 2-3 line professional summary at the top if there is none (facts only).
+- If a job description is given, use its relevant keywords where truthful.
+- If approved rewrites are given, use them for those lines.
+
+Output format: plain markdown using ONLY these elements, with no code fences and no
+commentary before or after:
+# Full Name
+contact line (email | phone | city | links)
+## SECTION NAME
+### Job Title | Company | Dates
+- bullet point
+plain text line (for the summary or skills)
+"""
+
+IMPROVED_CV_USER_PROMPT = """Resume:
+\"\"\"
+{resume_text}
+\"\"\"
+
+{jd_section}{rewrites_section}Write the improved resume."""
+
 COVER_LETTER_SYSTEM_PROMPT = """You are an expert career coach who writes cover letters.
 Write a professional, warm cover letter in English for the candidate below, tailored to
 the job description.
@@ -255,6 +284,32 @@ async def improve_resume(resume_text: str, job_description: str | None) -> Impro
     if not lines:
         raise RuntimeError("AI returned no improvements.")
     return ImproveResult(lines=lines)
+
+
+async def write_improved_resume(
+    resume_text: str, job_description: str | None, rewrites: list[ImprovedLine]
+) -> str:
+    """Return the improved resume as simple markdown (see IMPROVED_CV_SYSTEM_PROMPT)."""
+    rewrites_section = ""
+    if rewrites:
+        pairs = "\n".join(f"- {r.original} => {r.improved}" for r in rewrites)
+        rewrites_section = f"Approved rewrites (original => improved):\n{pairs}\n\n"
+
+    prompt = ChatPromptTemplate.from_messages(
+        [("system", IMPROVED_CV_SYSTEM_PROMPT), ("human", IMPROVED_CV_USER_PROMPT)]
+    )
+    chain = prompt | _llm(temperature=0.3) | StrOutputParser()
+    markdown: str = await _run(
+        chain,
+        {
+            "resume_text": resume_text,
+            "jd_section": _jd_section(job_description, "Target job description"),
+            "rewrites_section": rewrites_section,
+        },
+    )
+    if "## " not in markdown:
+        raise RuntimeError("AI returned a resume without sections.")
+    return markdown.strip()
 
 
 async def write_cover_letter(resume_text: str, job_description: str) -> CoverLetter:

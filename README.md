@@ -11,6 +11,7 @@ Built as a beginner-friendly MVP using **LangChain**, **FastAPI**, **Groq** and 
 - Job match percentage and missing keywords (when you paste a job description)
 - Feedback in **English, Roman Urdu, Urdu or Hindi**
 - **Auto-improve**: AI finds the weakest lines in your resume and shows a before/after rewrite for each
+- **Download improved CV**: AI rewrites your whole resume and gives you an editable Word (.docx) file
 - **Bullet rewriter**: paste a weak resume line and get 3 stronger versions
 - **Cover letter generator**: a tailored cover letter from your resume + job description
 - Clean, modern web interface
@@ -114,6 +115,7 @@ python test_analyze.py
 | POST   | `/analyze`      | Form: `file` (PDF), optional `job_description`, `language`        |
 | POST   | `/rewrite`      | JSON: `{ "text": "...", "job_description": "..." }` → 3 rewrites  |
 | POST   | `/improve`      | Form: `file` (PDF), optional `job_description` → weak lines + fixes |
+| POST   | `/improved-cv`  | Form: `file` (PDF), optional `job_description`, `rewrites` → .docx file |
 | POST   | `/cover-letter` | Form: `file` (PDF), `job_description` → cover letter text         |
 
 ## Deployment
@@ -157,7 +159,7 @@ python test_analyze.py
 
 - Interview question generator
 - Download the analysis as a PDF report
-- Support for more file formats (DOCX)
+- Upload DOCX resumes (not just PDF)
 - User accounts and saved analysis history
 
 ## Author

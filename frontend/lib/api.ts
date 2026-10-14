@@ -32,8 +32,7 @@ export async function readError(response: Response): Promise<string> {
   return detail;
 }
 
-/** POST to the API and return parsed JSON, or throw an Error with a readable message. */
-export async function postApi<T>(path: string, body: FormData | object): Promise<T> {
+async function post(path: string, body: FormData | object): Promise<Response> {
   const isForm = body instanceof FormData;
   let response: Response;
   try {
@@ -46,5 +45,26 @@ export async function postApi<T>(path: string, body: FormData | object): Promise
     throw new Error(OFFLINE_ERROR);
   }
   if (!response.ok) throw new Error(await readError(response));
-  return (await response.json()) as T;
+  return response;
+}
+
+/** POST to the API and return parsed JSON, or throw an Error with a readable message. */
+export async function postApi<T>(path: string, body: FormData | object): Promise<T> {
+  return (await (await post(path, body)).json()) as T;
+}
+
+/** POST to the API and return the response body as a file (Blob). */
+export async function postApiBlob(path: string, body: FormData | object): Promise<Blob> {
+  return (await post(path, body)).blob();
+}
+
+/** Ask the browser to save a Blob as a file. */
+export function saveBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  // Revoke later: some browsers start the download asynchronously.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

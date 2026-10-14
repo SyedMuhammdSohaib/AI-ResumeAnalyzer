@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { postApi } from "@/lib/api";
+import { postApi, saveBlob } from "@/lib/api";
 import type { CoverLetterResult } from "@/lib/types";
 import CopyButton from "./CopyButton";
 
@@ -40,13 +40,7 @@ export default function CoverLetter({
   }
 
   function download() {
-    const blob = new Blob([letter], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "cover-letter.txt";
-    link.click();
-    URL.revokeObjectURL(url);
+    saveBlob(new Blob([letter], { type: "text/plain;charset=utf-8" }), "cover-letter.txt");
   }
 
   return (

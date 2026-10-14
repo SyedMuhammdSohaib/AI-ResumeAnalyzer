@@ -375,6 +375,30 @@ body {
   outline-offset: 1px;
 }
 
+.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary:not(:disabled):hover {
+  background: rgba(91, 140, 255, 0.12);
+}
+
+.secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actions {
+  flex-wrap: wrap;
+}
+
 .ghost {
   background: transparent;
   color: var(--accent-2);
