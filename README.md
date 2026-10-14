@@ -120,7 +120,16 @@ python test_analyze.py
 
 ## Deployment
 
-### Backend (Render)
+### Backend (Vercel, free, no card needed)
+
+The backend includes `backend/api/index.py` and `backend/vercel.json`, so it can run on Vercel as a Python serverless function.
+
+1. In [Vercel](https://vercel.com), click **Add New → Project** and import this repository.
+2. Set **Root Directory** to `backend` and **Framework Preset** to **Other**.
+3. Add environment variables: `GROQ_API_KEY`, `GROQ_MODEL` and `ALLOWED_ORIGINS` (see the table below).
+4. Deploy, then open `https://<your-backend>.vercel.app/health`. It should return `{"status":"ok"}`.
+
+### Backend (Render, alternative)
 
 1. Create a new [Render](https://render.com) Web Service and connect this repository.
 2. Use the following settings:
