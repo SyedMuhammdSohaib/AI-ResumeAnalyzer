@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.main import app as fastapi_app  # noqa: E402
 
 PATH_PARAM = "__path"
-FUNCTION_PREFIX = "/api/index"
+FUNCTION_PREFIXES = ("/api/index.py", "/api/index")
 
 
 async def app(scope, receive, send):
@@ -24,8 +24,29 @@ async def app(scope, receive, send):
         path = scope.get("path", "/")
         if original is not None:
             path = "/" + original.lstrip("/")
-        elif path == FUNCTION_PREFIX or path.startswith(FUNCTION_PREFIX + "/"):
-            path = path[len(FUNCTION_PREFIX):] or "/"
+        else:
+            for prefix in FUNCTION_PREFIXES:
+                if path == prefix or path.startswith(prefix + "/"):
+                    path = path[len(prefix):] or "/"
+                    break
         rest = urlencode([(key, value) for key, value in query if key != PATH_PARAM])
-        scope = {**scope, "path": path, "raw_path": path.encode(), "query_string": rest.encode()}
+        print(
+            f"[vercel] incoming path={scope.get('path')!r} root_path={scope.get('root_path')!r} "
+            f"query={scope.get('query_string', b'')!r} -> path={path!r}",
+            flush=True,
+        )
+        # The app is served from the domain root; a root_path set by the runtime
+        # would make Starlette strip it and match no routes.
+        scope = {
+            **scope,
+            "path": path,
+            "raw_path": path.encode(),
+            "query_string": rest.encode(),
+            "root_path": "",
+            "vercel_original": {
+                "path": scope.get("path"),
+                "root_path": scope.get("root_path"),
+                "query": scope.get("query_string", b"").decode(errors="replace"),
+            },
+        }
     await fastapi_app(scope, receive, send)

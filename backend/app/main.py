@@ -4,6 +4,7 @@ import logging
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import TypeAdapter, ValidationError
 
 from .config import ALLOWED_ORIGINS, MAX_FILE_SIZE
@@ -159,6 +160,17 @@ async def cover_letter(
         return await write_cover_letter(resume_text, job_description)
     except RuntimeError as exc:
         raise _ai_error(exc)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc: StarletteHTTPException):
+    content: dict = {"detail": exc.detail}
+    if exc.status_code == 404:
+        # Helps debug hosting/routing problems: shows the path the app actually saw.
+        content["path"] = request.url.path
+        if "vercel_original" in request.scope:
+            content["received"] = request.scope["vercel_original"]
+    return JSONResponse(status_code=exc.status_code, content=content, headers=exc.headers)
 
 
 @app.exception_handler(Exception)
