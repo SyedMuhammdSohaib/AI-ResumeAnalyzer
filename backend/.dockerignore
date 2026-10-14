@@ -1,0 +1,16 @@
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.env
+.env.*
+.pip-cache/
+*.log
+sample/
+scripts/
+test_analyze.py
+.git/
+.gitignore
+Dockerfile
+.dockerignore

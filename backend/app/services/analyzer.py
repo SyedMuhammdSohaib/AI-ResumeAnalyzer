@@ -106,6 +106,8 @@ Write the cover letter."""
 def _llm(temperature: float = 0) -> ChatGroq:
     if not GROQ_API_KEY:
         raise RuntimeError("GROQ_API_KEY is not set. Add it to backend/.env")
+    if not GROQ_MODEL:
+        raise RuntimeError("GROQ_MODEL is not set. Add it to backend/.env")
     return ChatGroq(api_key=GROQ_API_KEY, model=GROQ_MODEL, temperature=temperature)
 
 

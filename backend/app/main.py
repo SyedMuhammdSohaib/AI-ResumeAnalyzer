@@ -4,7 +4,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .config import CORS_ORIGINS, MAX_FILE_SIZE
+from .config import ALLOWED_ORIGINS, MAX_FILE_SIZE
 from .schemas import CoverLetter, Language, ResumeAnalysis, RewriteRequest, RewriteResult
 from .services.analyzer import analyze_resume, rewrite_bullet, write_cover_letter
 from .services.pdf import ResumeValidationError, extract_text
@@ -16,7 +16,7 @@ app = FastAPI(title="AI Resume Analyzer API", version="1.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,7 +43,7 @@ async def _read_resume(file: UploadFile) -> str:
 
 def _ai_error(exc: RuntimeError) -> HTTPException:
     message = str(exc)
-    if "GROQ_API_KEY" in message:
+    if "is not set" in message:
         return HTTPException(status_code=503, detail=message)
     logger.error("AI request failed: %s", message)
     return HTTPException(
