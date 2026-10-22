@@ -15,7 +15,12 @@ export default function NavBar() {
           AI Resume Analyzer
         </Link>
         <div className="nav-links">
-          {[{ href: "/", label: "Home" }, ...TOOLS].map((link) => (
+          {[
+            { href: "/", label: "Home" },
+            ...TOOLS,
+            { href: "/about", label: "About" },
+            { href: "/contact", label: "Contact" },
+          ].map((link) => (
             <Link
               key={link.href}
               href={link.href}
