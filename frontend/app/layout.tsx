@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+import NavBar from "@/components/NavBar";
+import { ResumeProvider } from "@/components/ResumeContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,7 +12,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ResumeProvider>
+          <NavBar />
+          {children}
+          <footer className="footer">Powered by a FastAPI + Groq backend</footer>
+        </ResumeProvider>
+      </body>
     </html>
   );
 }

@@ -5,16 +5,12 @@ import { useState } from "react";
 import { postApi, saveBlob } from "@/lib/api";
 import type { CoverLetterResult } from "@/lib/types";
 import CopyButton from "./CopyButton";
+import { useResume } from "./ResumeContext";
 
 const MIN_JD_LENGTH = 20;
 
-export default function CoverLetter({
-  file,
-  jobDescription,
-}: {
-  file: File | null;
-  jobDescription: string;
-}) {
+export default function CoverLetter() {
+  const { file, jobDescription } = useResume();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [letter, setLetter] = useState("");

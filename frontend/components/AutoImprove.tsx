@@ -5,6 +5,7 @@ import { useState } from "react";
 import { postApi, postApiBlob, saveBlob } from "@/lib/api";
 import type { ImprovedLine, ImproveResult } from "@/lib/types";
 import CopyButton from "./CopyButton";
+import { useResume } from "./ResumeContext";
 
 function toText(lines: ImprovedLine[]): string {
   return lines
@@ -12,13 +13,8 @@ function toText(lines: ImprovedLine[]): string {
     .join("\n\n");
 }
 
-export default function AutoImprove({
-  file,
-  jobDescription,
-}: {
-  file: File | null;
-  jobDescription: string;
-}) {
+export default function AutoImprove() {
+  const { file, jobDescription } = useResume();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lines, setLines] = useState<ImprovedLine[]>([]);
