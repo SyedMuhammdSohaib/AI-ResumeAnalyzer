@@ -18,7 +18,9 @@
 
 body {
   margin: 0;
-  background: radial-gradient(1200px 600px at 70% -10%, #17234a 0%, var(--bg) 55%);
+  min-height: 100vh;
+  background: var(--bg) radial-gradient(1200px 600px at 70% -10%, #17234a 0%, var(--bg) 55%)
+    no-repeat;
   color: var(--text);
   font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   line-height: 1.5;
@@ -654,8 +656,34 @@ body {
   margin-bottom: 10px;
 }
 
+.contact-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 @media (max-width: 640px) {
-  .feature-grid {
+  .feature-grid,
+  .contact-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* About page */
+.about-text {
+  margin: 14px 0 0;
+}
+
+.stack-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+}
+
+.text-link {
+  color: var(--accent-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
 }
