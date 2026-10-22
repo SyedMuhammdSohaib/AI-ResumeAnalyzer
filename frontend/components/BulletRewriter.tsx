@@ -5,8 +5,10 @@ import { useState } from "react";
 import { postApi } from "@/lib/api";
 import type { RewriteResult } from "@/lib/types";
 import CopyButton from "./CopyButton";
+import { useResume } from "./ResumeContext";
 
-export default function BulletRewriter({ jobDescription }: { jobDescription: string }) {
+export default function BulletRewriter() {
+  const { jobDescription } = useResume();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

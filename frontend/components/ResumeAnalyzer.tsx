@@ -1,12 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
-import { fileSizeError, postApi } from "@/lib/api";
+import { postApi } from "@/lib/api";
 import type { Language, ResumeAnalysis } from "@/lib/types";
-import AutoImprove from "./AutoImprove";
-import BulletRewriter from "./BulletRewriter";
-import CoverLetter from "./CoverLetter";
+import { useResume } from "./ResumeContext";
+import ResumeInput from "./ResumeInput";
 import ScoreRing from "./ScoreRing";
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -24,22 +23,10 @@ const SECTION_LABELS: Record<keyof ResumeAnalysis["section_scores"], string> = {
 };
 
 export default function ResumeAnalyzer() {
-  const [file, setFile] = useState<File | null>(null);
-  const [jobDescription, setJobDescription] = useState("");
-  const [language, setLanguage] = useState<Language>("English");
-  const [dragging, setDragging] = useState(false);
+  const { file, jobDescription, language, setLanguage } = useResume();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ResumeAnalysis | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function pickFile(next: File | null) {
-    if (!next) return;
-    const problem = fileSizeError(next);
-    setError(problem);
-    setFile(problem ? null : next);
-    setResult(null);
-  }
 
   async function submit() {
     if (!file || loading) return;
@@ -61,56 +48,7 @@ export default function ResumeAnalyzer() {
 
   return (
     <div className="analyzer">
-      <section className="card">
-        <div
-          className={`dropzone${dragging ? " dragging" : ""}`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            pickFile(e.dataTransfer.files[0] ?? null);
-          }}
-          onClick={() => inputRef.current?.click()}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept="application/pdf,.pdf"
-            hidden
-            onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
-          />
-          <span className="dropzone-icon">PDF</span>
-          {file ? (
-            <p className="file-name">
-              {file.name} <span className="muted">({(file.size / 1024).toFixed(0)} KB)</span>
-            </p>
-          ) : (
-            <p className="muted">Drop your resume here, or click to browse (max 5 MB)</p>
-          )}
-        </div>
-
-        <label className="field-label" htmlFor="jd">
-          Job description <span className="muted">(optional, improves job-match scoring)</span>
-        </label>
-        <textarea
-          id="jd"
-          className="jd"
-          rows={5}
-          maxLength={20000}
-          placeholder="Paste the job description here…"
-          value={jobDescription}
-          onChange={(e) => setJobDescription(e.target.value)}
-        />
-
+      <ResumeInput>
         <label className="field-label" htmlFor="language">
           Feedback language
         </label>
@@ -142,16 +80,9 @@ export default function ResumeAnalyzer() {
             {error}
           </p>
         )}
-      </section>
+      </ResumeInput>
 
       {result && <Results data={result} />}
-
-      <h2 className="tools-title">AI tools</h2>
-      <AutoImprove file={file} jobDescription={jobDescription} />
-      <div className="grid-2 tools">
-        <BulletRewriter jobDescription={jobDescription} />
-        <CoverLetter file={file} jobDescription={jobDescription} />
-      </div>
     </div>
   );
 }
