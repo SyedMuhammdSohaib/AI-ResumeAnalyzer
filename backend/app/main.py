@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from typing import Literal
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +28,7 @@ from .services.analyzer import (
     write_cover_letter,
 )
 from .services.docx_builder import build_docx
+from .services.pdf_builder import build_pdf
 from .services.pdf import ResumeValidationError, extract_text
 from .vercel import VercelPathMiddleware
 
@@ -49,13 +51,7 @@ if os.getenv("VERCEL"):
 
 
 async def _read_resume(file: UploadFile) -> str:
-    if file.content_type and not file.content_type.startswith("application/pdf"):
-        if not (file.filename or "").lower().endswith(".pdf"):
-            raise HTTPException(
-                status_code=415,
-                detail="Invalid file type. Please upload a PDF resume.",
-            )
-
+    # File type is checked by extension and content in extract_text.
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File is too large. Maximum size is 5 MB.")
@@ -91,7 +87,7 @@ async def health() -> dict:
 
 @app.post("/analyze", response_model=ResumeAnalysis)
 async def analyze(
-    file: UploadFile = File(..., description="Resume PDF"),
+    file: UploadFile = File(..., description="Resume (PDF or DOCX)"),
     job_description: str | None = Form(default=None, max_length=20000),
     language: Language = Form(default="English"),
 ) -> ResumeAnalysis:
@@ -115,7 +111,7 @@ async def rewrite(request: RewriteRequest) -> RewriteResult:
 
 @app.post("/improve", response_model=ImproveResult)
 async def improve(
-    file: UploadFile = File(..., description="Resume PDF"),
+    file: UploadFile = File(..., description="Resume (PDF or DOCX)"),
     job_description: str | None = Form(default=None, max_length=20000),
 ) -> ImproveResult:
     resume_text = await _read_resume(file)
@@ -127,16 +123,21 @@ async def improve(
 
 
 DOCX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+CV_FORMATS = {
+    "docx": (build_docx, DOCX_MEDIA_TYPE),
+    "pdf": (build_pdf, "application/pdf"),
+}
 _rewrites_adapter = TypeAdapter(list[ImprovedLine])
 
 
 @app.post("/improved-cv")
 async def improved_cv(
-    file: UploadFile = File(..., description="Resume PDF"),
+    file: UploadFile = File(..., description="Resume (PDF or DOCX)"),
     job_description: str | None = Form(default=None, max_length=20000),
     rewrites: str | None = Form(default=None, max_length=50000),
+    format: Literal["docx", "pdf"] = Form(default="docx"),
 ) -> Response:
-    """Rewrite the whole resume with AI and return it as a Word (.docx) file."""
+    """Rewrite the whole resume with AI and return it as a Word (.docx) or PDF file."""
     approved: list[ImprovedLine] = []
     if rewrites:
         try:
@@ -145,22 +146,23 @@ async def improved_cv(
             raise HTTPException(status_code=422, detail="Invalid rewrites data.")
 
     resume_text = await _read_resume(file)
-    logger.info("Building improved CV for: %s", file.filename)
+    logger.info("Building improved CV (%s) for: %s", format, file.filename)
     try:
         markdown = await write_improved_resume(resume_text, job_description, approved)
     except RuntimeError as exc:
         raise _ai_error(exc)
 
+    build, media_type = CV_FORMATS[format]
     return Response(
-        content=build_docx(markdown),
-        media_type=DOCX_MEDIA_TYPE,
-        headers={"Content-Disposition": 'attachment; filename="improved-resume.docx"'},
+        content=build(markdown),
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="improved-resume.{format}"'},
     )
 
 
 @app.post("/cover-letter", response_model=CoverLetter)
 async def cover_letter(
-    file: UploadFile = File(..., description="Resume PDF"),
+    file: UploadFile = File(..., description="Resume (PDF or DOCX)"),
     job_description: str = Form(..., min_length=20, max_length=20000),
 ) -> CoverLetter:
     resume_text = await _read_resume(file)

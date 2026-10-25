@@ -10,7 +10,6 @@ const STACK = [
 const ROADMAP = [
   "Interview question generator",
   "Download the analysis as a PDF report",
-  "Upload DOCX resumes (not just PDF)",
   "User accounts and saved analysis history",
 ];
 
@@ -48,7 +47,7 @@ export default function AboutPage() {
           ))}
         </div>
         <p className="muted about-text">
-          The backend extracts text from your PDF and sends it to the LLM with a carefully
+          The backend extracts text from your PDF or Word file and sends it to the LLM with a carefully
           written prompt. The app does not save your resume; it is only used to answer that
           request.
         </p>

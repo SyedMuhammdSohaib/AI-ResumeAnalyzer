@@ -7,6 +7,8 @@ import type { ImprovedLine, ImproveResult } from "@/lib/types";
 import CopyButton from "./CopyButton";
 import { useResume } from "./ResumeContext";
 
+type CvFormat = "docx" | "pdf";
+
 function toText(lines: ImprovedLine[]): string {
   return lines
     .map((line, i) => `${i + 1}. BEFORE: ${line.original}\n   AFTER:  ${line.improved}`)
@@ -18,7 +20,7 @@ export default function AutoImprove() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lines, setLines] = useState<ImprovedLine[]>([]);
-  const [building, setBuilding] = useState(false);
+  const [building, setBuilding] = useState<CvFormat | null>(null);
 
   function resumeForm(): FormData {
     const form = new FormData();
@@ -41,19 +43,20 @@ export default function AutoImprove() {
     }
   }
 
-  async function downloadCv() {
+  async function downloadCv(format: CvFormat) {
     if (!file || building) return;
-    setBuilding(true);
+    setBuilding(format);
     setError(null);
     try {
       const form = resumeForm();
       // Reuse the rewrites already shown so the new CV matches them.
       if (lines.length) form.append("rewrites", JSON.stringify(lines));
-      saveBlob(await postApiBlob("/improved-cv", form), "improved-resume.docx");
+      form.append("format", format);
+      saveBlob(await postApiBlob("/improved-cv", form), `improved-resume.${format}`);
     } catch (err) {
       setError((err as Error).message);
     } finally {
-      setBuilding(false);
+      setBuilding(null);
     }
   }
 
@@ -70,11 +73,22 @@ export default function AutoImprove() {
           : "Upload your resume above to find and fix its weak lines automatically."}
       </p>
       <div className="actions">
-        <button className="primary" onClick={improve} disabled={!file || loading || building}>
+        <button className="primary" onClick={improve} disabled={!file || loading || !!building}>
           {loading ? "Finding weak lines…" : lines.length ? "Run again" : "Find & fix weak lines 🪄"}
         </button>
-        <button className="secondary" onClick={downloadCv} disabled={!file || loading || building}>
-          {building ? "Building your CV…" : "Download improved CV (.docx) 📄"}
+        <button
+          className="secondary"
+          onClick={() => downloadCv("docx")}
+          disabled={!file || loading || !!building}
+        >
+          {building === "docx" ? "Building your CV…" : "Download improved CV (.docx) 📄"}
+        </button>
+        <button
+          className="secondary"
+          onClick={() => downloadCv("pdf")}
+          disabled={!file || loading || !!building}
+        >
+          {building === "pdf" ? "Building your PDF…" : "Download as PDF 📕"}
         </button>
       </div>
       {building && (

@@ -10,7 +10,7 @@ export const TOOLS = [
     href: "/auto-improve",
     label: "Auto-Improve",
     title: "Auto-Improve",
-    description: "Finds your weakest lines, rewrites them and builds an improved .docx CV.",
+    description: "Finds your weakest lines, rewrites them and builds an improved CV (Word or PDF).",
   },
   {
     href: "/bullet-rewriter",

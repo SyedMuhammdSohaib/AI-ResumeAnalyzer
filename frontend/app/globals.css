@@ -558,7 +558,7 @@ body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 6px;
 }
 
 .sidebar-head {
@@ -566,6 +566,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 10px;
+  margin-bottom: 12px;
 }
 
 .brand {
@@ -580,13 +581,47 @@ body {
   gap: 2px;
 }
 
-.sidebar-title {
-  margin: 0 0 6px;
-  padding: 0 12px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(91, 140, 255, 0.08);
+}
+
+.chevron {
   color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.sidebar-toggle.open .chevron {
+  transform: rotate(90deg);
+}
+
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 0 12px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+
+.sidebar-group .nav-link {
+  display: block;
 }
 
 .nav-link {

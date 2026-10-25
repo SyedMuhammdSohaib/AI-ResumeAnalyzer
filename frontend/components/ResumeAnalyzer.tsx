@@ -71,7 +71,7 @@ export default function ResumeAnalyzer() {
 
         {loading && (
           <p className="status" role="status">
-            <span className="spinner" /> Reading the PDF and asking the AI — this can take up to a
+            <span className="spinner" /> Reading your resume and asking the AI — this can take up to a
             minute…
           </p>
         )}
