@@ -19,6 +19,12 @@ export const TOOLS = [
     description: "Turn one weak resume line into 3 stronger, results-focused versions.",
   },
   {
+    href: "/skill-roadmap",
+    label: "Skill Roadmap",
+    title: "Skill Roadmap",
+    description: "Find the skills you are missing and get a learning plan with free resources.",
+  },
+  {
     href: "/cover-letter",
     label: "Cover Letter",
     title: "Cover Letter",

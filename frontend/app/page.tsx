@@ -33,7 +33,14 @@ export default function Home() {
 
       <h2 className="tools-title">What you can do</h2>
       <div className="feature-grid">
-        {TOOLS.map((tool) => (
+        {[
+          ...TOOLS,
+          {
+            href: "/history",
+            title: "History",
+            description: "See your past analyses and roadmaps and how your ATS score improves.",
+          },
+        ].map((tool) => (
           <Link key={tool.href} href={tool.href} className="card feature-card">
             <h2>{tool.title}</h2>
             <p className="muted">{tool.description}</p>

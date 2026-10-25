@@ -3,17 +3,12 @@
 import { useState } from "react";
 
 import { postApi } from "@/lib/api";
-import type { Language, ResumeAnalysis } from "@/lib/types";
+import { addHistory } from "@/lib/history";
+import type { ResumeAnalysis } from "@/lib/types";
+import LanguageSelect from "./LanguageSelect";
 import { useResume } from "./ResumeContext";
 import ResumeInput from "./ResumeInput";
 import ScoreRing from "./ScoreRing";
-
-const LANGUAGES: { value: Language; label: string }[] = [
-  { value: "English", label: "English" },
-  { value: "Roman Urdu", label: "Roman Urdu" },
-  { value: "Urdu", label: "اردو (Urdu)" },
-  { value: "Hindi", label: "हिंदी (Hindi)" },
-];
 
 const SECTION_LABELS: Record<keyof ResumeAnalysis["section_scores"], string> = {
   skills: "Skills",
@@ -23,7 +18,7 @@ const SECTION_LABELS: Record<keyof ResumeAnalysis["section_scores"], string> = {
 };
 
 export default function ResumeAnalyzer() {
-  const { file, jobDescription, language, setLanguage } = useResume();
+  const { file, jobDescription, language } = useResume();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ResumeAnalysis | null>(null);
@@ -38,7 +33,9 @@ export default function ResumeAnalyzer() {
       form.append("file", file);
       if (jobDescription.trim()) form.append("job_description", jobDescription.trim());
       form.append("language", language);
-      setResult(await postApi<ResumeAnalysis>("/analyze", form));
+      const analysis = await postApi<ResumeAnalysis>("/analyze", form);
+      setResult(analysis);
+      addHistory({ kind: "analysis", fileName: file.name, result: analysis });
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -49,21 +46,7 @@ export default function ResumeAnalyzer() {
   return (
     <div className="analyzer">
       <ResumeInput>
-        <label className="field-label" htmlFor="language">
-          Feedback language
-        </label>
-        <select
-          id="language"
-          className="select"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value as Language)}
-        >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
+        <LanguageSelect />
 
         <button className="primary" onClick={submit} disabled={!file || loading}>
           {loading ? "Analyzing…" : "Analyze resume"}
@@ -87,7 +70,7 @@ export default function ResumeAnalyzer() {
   );
 }
 
-function Results({ data }: { data: ResumeAnalysis }) {
+export function Results({ data }: { data: ResumeAnalysis }) {
   return (
     <div className="results">
       <section className="card overview">

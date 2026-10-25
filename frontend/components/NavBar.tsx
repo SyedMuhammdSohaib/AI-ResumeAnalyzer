@@ -7,7 +7,13 @@ import { useEffect, useState } from "react";
 import { TOOLS } from "@/lib/tools";
 
 const SECTIONS = [
-  { title: null, links: [{ href: "/", label: "Home" }] },
+  {
+    title: null,
+    links: [
+      { href: "/", label: "Home" },
+      { href: "/history", label: "History" },
+    ],
+  },
   { title: "Tools", links: TOOLS },
   {
     title: "More",
@@ -96,7 +102,7 @@ export default function NavBar() {
                 </button>
               )}
               {isOpen && (
-                <div id={listId} className={section.title ? "sidebar-group" : undefined}>
+                <div id={listId} className={section.title ? "sidebar-group" : "sidebar-list"}>
                   {section.links.map((link) => (
                     <Link
                       key={link.href}

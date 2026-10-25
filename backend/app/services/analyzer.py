@@ -15,6 +15,7 @@ from ..schemas import (
     Language,
     ResumeAnalysis,
     RewriteResult,
+    SkillRoadmap,
 )
 
 AI_TIMEOUT_SECONDS = 90
@@ -166,6 +167,45 @@ Job Description:
 \"\"\"
 
 Write the cover letter."""
+
+
+ROADMAP_SYSTEM_PROMPT = """You are an experienced career coach and technical mentor.
+Compare the candidate's resume with their target role and build a practical learning
+roadmap for the skills they are missing.
+
+Rules:
+- target_role: the role the roadmap aims at. Use the job description or the target role
+  given by the user; if neither is given, pick the most natural next role for this resume.
+- summary: 2-3 sentences on where the candidate stands and what to focus on.
+- current_skills: 5-12 relevant skills the resume already shows (short names).
+- gaps: 3-7 missing or weak skills, most important first. For each:
+  - skill: short name (e.g. "Docker", "System design").
+  - priority: High, Medium or Low, by how much it matters for the target role.
+  - time_estimate: realistic part-time estimate, e.g. "2 weeks" or "1-2 months".
+  - why: one sentence on why it matters for this role.
+  - steps: 3-5 concrete learning steps, ending with a small project to prove the skill.
+  - resources: 2-3 well-known FREE resources by name, e.g. "Official Docker docs:
+    Get started" or "freeCodeCamp YouTube: Docker course". No URLs, and never invent a
+    resource you are not sure exists.
+- total_time: overall estimate to close the gaps part-time, e.g. "3-4 months".
+- Never claim the candidate has a skill that is not in the resume.
+
+Output language: write summary, why and steps in {language}. Keep skill names,
+target_role and resource names in English."""
+
+ROADMAP_USER_PROMPT = """Resume:
+\"\"\"
+{resume_text}
+\"\"\"
+
+{target_section}Build the skill gap roadmap."""
+
+ROADMAP_LANGUAGES: dict[str, str] = {
+    "English": "English",
+    "Roman Urdu": "simple Roman Urdu (Urdu written with English letters)",
+    "Urdu": "simple Urdu using Urdu script",
+    "Hindi": "simple Hindi using Devanagari script",
+}
 
 
 def _llm(temperature: float = 0) -> ChatGroq:
@@ -358,3 +398,31 @@ async def write_cover_letter(resume_text: str, job_description: str) -> CoverLet
         {"resume_text": resume_text, "job_description": job_description.strip()},
     )
     return CoverLetter(cover_letter=letter.strip())
+
+
+async def build_skill_roadmap(
+    resume_text: str,
+    job_description: str | None,
+    target_role: str | None,
+    language: Language = "English",
+) -> SkillRoadmap:
+    target_section = ""
+    if target_role and target_role.strip():
+        target_section = f"Target role: {target_role.strip()}\n\n"
+    if job_description and job_description.strip():
+        target_section += _jd_section(job_description, "Target job description")
+    if not target_section:
+        target_section = "No target role or job description given.\n\n"
+
+    prompt = ChatPromptTemplate.from_messages(
+        [("system", ROADMAP_SYSTEM_PROMPT), ("human", ROADMAP_USER_PROMPT)]
+    )
+    chain = prompt | _llm(temperature=0.2).with_structured_output(SkillRoadmap)
+    return await _run(
+        chain,
+        {
+            "resume_text": resume_text,
+            "target_section": target_section,
+            "language": ROADMAP_LANGUAGES[language],
+        },
+    )

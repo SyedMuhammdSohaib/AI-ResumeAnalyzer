@@ -14,6 +14,8 @@ Built as a beginner-friendly MVP using **LangChain**, **FastAPI**, **Groq** and 
 - **Download improved CV**: AI rewrites your whole resume and gives you an editable Word (.docx) file or a PDF
 - **Bullet rewriter**: paste a weak resume line and get 3 stronger versions
 - **Cover letter generator**: a tailored cover letter from your resume + job description
+- **Skill gap roadmap**: the skills you are missing for a target role, with time estimates, learning steps and free resources
+- **History**: past analyses and roadmaps are saved in your browser, with a chart of how your ATS score improves
 - Clean, modern web interface
 - Fast responses powered by Groq's free cloud LLM API
 
@@ -117,6 +119,7 @@ python test_analyze.py
 | POST   | `/improve`      | Form: `file` (PDF or DOCX), optional `job_description` → weak lines + fixes |
 | POST   | `/improved-cv`  | Form: `file` (PDF or DOCX), optional `job_description`, `rewrites`, `format` (`docx` or `pdf`) → file |
 | POST   | `/cover-letter` | Form: `file` (PDF or DOCX), `job_description` → cover letter text |
+| POST   | `/skill-roadmap` | Form: `file` (PDF or DOCX), optional `job_description`, `target_role`, `language` → learning roadmap |
 
 ## Deployment
 
@@ -168,7 +171,7 @@ The backend includes `backend/api/index.py` and `backend/vercel.json`, so it can
 
 - Interview question generator
 - Download the analysis as a PDF report
-- User accounts and saved analysis history
+- User accounts, so history syncs across devices
 
 ## Author
 

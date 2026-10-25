@@ -41,3 +41,20 @@ export interface ImprovedLine {
 export interface ImproveResult {
   lines: ImprovedLine[];
 }
+
+export interface SkillGap {
+  skill: string;
+  priority: "High" | "Medium" | "Low";
+  time_estimate: string;
+  why: string;
+  steps: string[];
+  resources: string[];
+}
+
+export interface SkillRoadmap {
+  target_role: string;
+  summary: string;
+  current_skills: string[];
+  gaps: SkillGap[];
+  total_time: string;
+}

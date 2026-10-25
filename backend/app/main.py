@@ -18,10 +18,12 @@ from .schemas import (
     ResumeAnalysis,
     RewriteRequest,
     RewriteResult,
+    SkillRoadmap,
 )
 from .services.analyzer import (
     AIServiceError,
     analyze_resume,
+    build_skill_roadmap,
     improve_resume,
     write_improved_resume,
     rewrite_bullet,
@@ -169,6 +171,21 @@ async def cover_letter(
     logger.info("Writing cover letter for: %s", file.filename)
     try:
         return await write_cover_letter(resume_text, job_description)
+    except RuntimeError as exc:
+        raise _ai_error(exc)
+
+
+@app.post("/skill-roadmap", response_model=SkillRoadmap)
+async def skill_roadmap(
+    file: UploadFile = File(..., description="Resume (PDF or DOCX)"),
+    job_description: str | None = Form(default=None, max_length=20000),
+    target_role: str | None = Form(default=None, max_length=200),
+    language: Language = Form(default="English"),
+) -> SkillRoadmap:
+    resume_text = await _read_resume(file)
+    logger.info("Building skill roadmap for: %s (%s)", file.filename, language)
+    try:
+        return await build_skill_roadmap(resume_text, job_description, target_role, language)
     except RuntimeError as exc:
         raise _ai_error(exc)
 

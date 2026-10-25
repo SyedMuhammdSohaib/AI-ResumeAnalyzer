@@ -51,3 +51,20 @@ class ImprovedLine(BaseModel):
 
 class ImproveResult(BaseModel):
     lines: list[ImprovedLine]
+
+
+class SkillGap(BaseModel):
+    skill: str
+    priority: Literal["High", "Medium", "Low"]
+    time_estimate: str
+    why: str
+    steps: list[str]
+    resources: list[str]
+
+
+class SkillRoadmap(BaseModel):
+    target_role: str
+    summary: str
+    current_skills: list[str]
+    gaps: list[SkillGap]
+    total_time: str
