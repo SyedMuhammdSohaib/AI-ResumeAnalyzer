@@ -6,12 +6,12 @@ Built as a beginner-friendly MVP using **LangChain**, **FastAPI**, **Groq** and 
 
 ## Features
 
-- Upload your resume (PDF) and get an instant AI analysis
+- Upload your resume (PDF or Word .docx) and get an instant AI analysis
 - ATS score, section-wise scores, strengths, weaknesses and suggestions
 - Job match percentage and missing keywords (when you paste a job description)
 - Feedback in **English, Roman Urdu, Urdu or Hindi**
 - **Auto-improve**: AI finds the weakest lines in your resume and shows a before/after rewrite for each
-- **Download improved CV**: AI rewrites your whole resume and gives you an editable Word (.docx) file
+- **Download improved CV**: AI rewrites your whole resume and gives you an editable Word (.docx) file or a PDF
 - **Bullet rewriter**: paste a weak resume line and get 3 stronger versions
 - **Cover letter generator**: a tailored cover letter from your resume + job description
 - Clean, modern web interface
@@ -112,11 +112,11 @@ python test_analyze.py
 | Method | Path            | What it does                                                      |
 |--------|-----------------|-------------------------------------------------------------------|
 | GET    | `/health`       | Health check                                                      |
-| POST   | `/analyze`      | Form: `file` (PDF), optional `job_description`, `language`        |
+| POST   | `/analyze`      | Form: `file` (PDF or DOCX), optional `job_description`, `language` |
 | POST   | `/rewrite`      | JSON: `{ "text": "...", "job_description": "..." }` → 3 rewrites  |
-| POST   | `/improve`      | Form: `file` (PDF), optional `job_description` → weak lines + fixes |
-| POST   | `/improved-cv`  | Form: `file` (PDF), optional `job_description`, `rewrites` → .docx file |
-| POST   | `/cover-letter` | Form: `file` (PDF), `job_description` → cover letter text         |
+| POST   | `/improve`      | Form: `file` (PDF or DOCX), optional `job_description` → weak lines + fixes |
+| POST   | `/improved-cv`  | Form: `file` (PDF or DOCX), optional `job_description`, `rewrites`, `format` (`docx` or `pdf`) → file |
+| POST   | `/cover-letter` | Form: `file` (PDF or DOCX), `job_description` → cover letter text |
 
 ## Deployment
 
@@ -168,7 +168,6 @@ The backend includes `backend/api/index.py` and `backend/vercel.json`, so it can
 
 - Interview question generator
 - Download the analysis as a PDF report
-- Upload DOCX resumes (not just PDF)
 - User accounts and saved analysis history
 
 ## Author

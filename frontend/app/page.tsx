@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TOOLS } from "@/lib/tools";
 
 const STEPS = [
-  { title: "Upload", text: "Drop your resume PDF. Optionally paste the job you are applying for." },
+  { title: "Upload", text: "Drop your resume (PDF or Word). Optionally paste the job you are applying for." },
   { title: "Analyze", text: "The backend reads your resume and a Groq-hosted LLM reviews it." },
   { title: "Improve", text: "Get scores, fixes, rewritten lines, a new CV and a cover letter." },
 ];

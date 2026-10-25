@@ -51,11 +51,11 @@ export default function ResumeInput({
           <input
             ref={inputRef}
             type="file"
-            accept="application/pdf,.pdf"
+            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             hidden
             onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
           />
-          <span className="dropzone-icon">PDF</span>
+          <span className="dropzone-icon">PDF / DOCX</span>
           {file ? (
             <p className="file-name">
               {file.name} <span className="muted">({(file.size / 1024).toFixed(0)} KB)</span>

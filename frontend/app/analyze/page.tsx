@@ -7,7 +7,7 @@ export default function AnalyzePage() {
         <span className="badge">Analyzer</span>
         <h1>Resume Analyzer</h1>
         <p>
-          Upload your resume PDF and get an ATS score, section-wise ratings, strengths,
+          Upload your resume (PDF or Word .docx) and get an ATS score, section-wise ratings, strengths,
           weaknesses and actionable suggestions. Add a job description to see how well you match.
         </p>
       </header>

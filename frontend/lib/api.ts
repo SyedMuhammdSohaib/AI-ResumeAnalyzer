@@ -9,8 +9,12 @@ export const MAX_FILE_SIZE_MB = 5;
 export const OFFLINE_ERROR = `Could not reach the API at ${API_BASE}. Is the backend running?`;
 
 export function fileSizeError(file: File): string | null {
-  if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
-    return "Only PDF files are supported.";
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".doc")) {
+    return "Old Word (.doc) files are not supported. Save it as .docx or PDF and try again.";
+  }
+  if (!name.endsWith(".pdf") && !name.endsWith(".docx")) {
+    return "Only PDF and Word (.docx) files are supported.";
   }
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
     return `File is too large (max ${MAX_FILE_SIZE_MB} MB).`;
