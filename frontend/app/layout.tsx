@@ -15,8 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ResumeProvider>
           <NavBar />
-          {children}
-          <footer className="footer">Powered by a FastAPI + Groq backend</footer>
+          <div className="main-area">
+            {children}
+            <footer className="footer">Powered by a FastAPI + Groq backend</footer>
+          </div>
         </ResumeProvider>
       </body>
     </html>
