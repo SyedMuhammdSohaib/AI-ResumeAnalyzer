@@ -10,7 +10,7 @@ const STACK = [
 const ROADMAP = [
   "Interview question generator",
   "Download the analysis as a PDF report",
-  "User accounts and saved analysis history",
+  "User accounts, so history syncs across devices",
 ];
 
 export default function AboutPage() {
